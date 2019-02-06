@@ -1,0 +1,15 @@
+{
+  "name": "midi-synth",
+  "version": "0.0.1",
+  "description": "MIDI synth",
+  "main": "build/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Daniel Reiter",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/webmidi": "^2.0.2",
+    "typescript": "^3.3.1"
+  },
+}
