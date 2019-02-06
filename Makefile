@@ -1,4 +1,4 @@
-.PHONY: build clean copy-html install watch
+.PHONY: build clean copy-html install run watch
 	default: build
 
 INSTALL_DIR=./node_modules/typescript/bin/
