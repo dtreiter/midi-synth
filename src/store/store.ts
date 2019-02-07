@@ -4,13 +4,13 @@ import {KNOB_TURN, NOTE_ON, NOTE_OFF, KnobTurnPayload, NoteOffPayload, NoteOnPay
 
 export interface StoreState {
   notes: number[];
-  knobs: [number, number];
+  knobs: [number, number, number];
 }
 
 export class Store {
   private state: StoreState = {
     notes: [],
-    knobs: [0, 0],
+    knobs: [0, 0, 0],
   };
 
   constructor(

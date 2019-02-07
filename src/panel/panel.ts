@@ -1,5 +1,6 @@
 import {EventBus} from '../event_bus.js';
 import {STORE_CHANGE, STORE_INITIALIZED} from '../store/events.js';
+import {WAVEFORMS} from '../synth.js';
 
 export class Panel {
   constructor(
@@ -23,10 +24,13 @@ export class Panel {
         <b>Note:</b> ${notes}
       </p>
       <p>
-        <b>Attack:</b> ${knobs[0]}
+        <b>Waveform:</b> ${WAVEFORMS[knobs[0] % WAVEFORMS.length]}
       </p>
       <p>
-        <b>Decay:</b> ${knobs[1]}
+        <b>Attack:</b> ${knobs[1]}
+      </p>
+      <p>
+        <b>Decay:</b> ${knobs[2]}
       </p>
     `;
 

@@ -1,9 +1,17 @@
 import {EventBus, EventPayload} from './event_bus.js'
 import {KNOB_TURN, NOTE_ON, NOTE_OFF, KnobTurnPayload, NoteOffPayload, NoteOnPayload} from './midi/events.js';
 
+export const WAVEFORMS: OscillatorType[] = [
+  'sine',
+  'triangle',
+  'square',
+  'sawtooth',
+];
+
 export class Synth {
   attack = 10;  // Range from 0-127.
   decay = 127;  // Range from 0-127.
+  waveform = WAVEFORMS[0];
 
   private nodes: {[key: number]: GainNode} = {};
   private notesToFreq: number[];
@@ -29,8 +37,10 @@ export class Synth {
    handleKnobTurn(knobTurnEvent: EventPayload<KnobTurnPayload>) {
     const {knob, value} = knobTurnEvent.detail;
     if (knob === 0) {
-      this.attack = value;
+      this.waveform = WAVEFORMS[value % WAVEFORMS.length];
     } else if (knob === 1) {
+      this.attack = value;
+    } else if (knob === 2) {
       this.decay = value;
     }
   }
@@ -85,15 +95,15 @@ export class Synth {
     gainNode.gain.exponentialRampToValueAtTime(
         gainValue, this.audioContext.currentTime + attackTime);
 
-    const node = this.generateSine(note, velocity);
+    const node = this.generateWaveform(note, velocity);
     // const node = this.generateKarplus(note, velocity);
     node.connect(gainNode);
     this.nodes[note] = gainNode;
   }
 
-  generateSine(note: number, velocity: number): OscillatorNode {
+  generateWaveform(note: number, velocity: number): OscillatorNode {
     const osc = this.audioContext.createOscillator();
-    osc.type = 'sine';
+    osc.type = this.waveform;
     osc.frequency.setValueAtTime(
       this.notesToFreq[note], this.audioContext.currentTime);
     osc.start();
