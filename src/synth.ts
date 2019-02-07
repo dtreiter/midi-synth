@@ -8,12 +8,19 @@ export const WAVEFORMS: OscillatorType[] = [
   'sawtooth',
 ];
 
+interface Nodes {
+  [key: number]: {
+    gainNode: GainNode,
+    oscillatorNode: OscillatorNode,
+  };
+}
+
 export class Synth {
   attack = 10;  // Range from 0-127.
   decay = 127;  // Range from 0-127.
   waveform = WAVEFORMS[0];
 
-  private nodes: {[key: number]: GainNode} = {};
+  private nodes: Nodes = {};
   private notesToFreq: number[];
 
   constructor(
@@ -95,10 +102,13 @@ export class Synth {
     gainNode.gain.exponentialRampToValueAtTime(
         gainValue, this.audioContext.currentTime + attackTime);
 
-    const node = this.generateWaveform(note, velocity);
-    // const node = this.generateKarplus(note, velocity);
-    node.connect(gainNode);
-    this.nodes[note] = gainNode;
+    const oscillatorNode = this.generateWaveform(note, velocity);
+    // const oscillatorNode = this.generateKarplus(note, velocity);
+    oscillatorNode.connect(gainNode);
+    this.nodes[note] = {
+      gainNode,
+      oscillatorNode,
+    };
   }
 
   generateWaveform(note: number, velocity: number): OscillatorNode {
@@ -134,10 +144,15 @@ export class Synth {
   noteOff(noteOffEvent: EventPayload<NoteOffPayload>) {
     const {note} = noteOffEvent.detail;
     const decayTime = 2 * ((this.decay + 1) / 128) + 0.01;
-    this.nodes[note].gain.exponentialRampToValueAtTime(
+    this.nodes[note].gainNode.gain.exponentialRampToValueAtTime(
         1E-15, this.audioContext.currentTime + decayTime);
-    this.nodes[note].gain.setValueAtTime(
+    this.nodes[note].gainNode.gain.setValueAtTime(
         0, this.audioContext.currentTime + decayTime);
+    this.cleanupNodes(note);
+  }
+
+  private cleanupNodes(note: number) {
+    this.nodes[note].oscillatorNode.stop();
     delete this.nodes[note];
   }
 }
