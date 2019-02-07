@@ -9,4 +9,4 @@
   - Can't use store for note on/off easily though
 
 - Add css arch knobs
-- Pitch bend
+- Vibrato mod wheel
