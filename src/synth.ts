@@ -1,5 +1,5 @@
 import {EventBus, EventPayload} from './event_bus.js'
-import {KNOB_TURN, NOTE_ON, NOTE_OFF, KnobTurnPayload, NoteOffPayload, NoteOnPayload} from './midi/events.js';
+import {KNOB_TURN, NOTE_ON, NOTE_OFF, PITCH_BEND, KnobTurnPayload, NoteOffPayload, NoteOnPayload, PitchBendPayload} from './midi/events.js';
 
 export const WAVEFORMS: OscillatorType[] = [
   'sine',
@@ -16,12 +16,13 @@ interface Nodes {
 }
 
 export class Synth {
-  attack = 10;  // Range from 0-127.
-  decay = 127;  // Range from 0-127.
+  attack = 10;  // Range from (0, 127).
+  decay = 127;  // Range from (0, 127).
   waveform = WAVEFORMS[0];
 
   private nodes: Nodes = {};
   private notesToFreq: number[];
+  private pitchBend: number = 0;  // Range from (-64, 63).
 
   constructor(
     private readonly audioContext: AudioContext, 
@@ -36,12 +37,10 @@ export class Synth {
     this.eventBus.listen(KNOB_TURN, this.handleKnobTurn.bind(this));
     this.eventBus.listen(NOTE_ON, this.noteOn.bind(this));
     this.eventBus.listen(NOTE_OFF, this.noteOff.bind(this));
+    this.eventBus.listen(PITCH_BEND, this.handlePitchBend.bind(this));
   }
 
-  /**
-   * @param {KnobTurnEvent} note
-   */
-   handleKnobTurn(knobTurnEvent: EventPayload<KnobTurnPayload>) {
+  private handleKnobTurn(knobTurnEvent: EventPayload<KnobTurnPayload>) {
     const {knob, value} = knobTurnEvent.detail;
     if (knob === 0) {
       this.waveform = WAVEFORMS[value % WAVEFORMS.length];
@@ -52,10 +51,7 @@ export class Synth {
     }
   }
 
-  /**
-   * @return {Array<number>}
-   */
-  computeNoteTable() {
+  private computeNoteTable(): number[] {
     // The frequency of notes is given by:
     //   f_n = f_0 * a^n 
     //
@@ -83,7 +79,17 @@ export class Synth {
     return noteMap;
   }
 
-  noteOn(noteOnEvent: EventPayload<NoteOnPayload>) {
+  private computeFrequency(note: number): number {
+    // See the formula mentioned in `computeNoteTable`.
+    const f_0 = this.notesToFreq[note];
+    const a = Math.pow(2, 1/12);
+    // Convert value range to (-2, 2) to represent semitones.
+    const n = this.pitchBend / 32;
+
+    return f_0 * Math.pow(a, n);
+  }
+
+  private noteOn(noteOnEvent: EventPayload<NoteOnPayload>) {
     const {note, velocity} = noteOnEvent.detail;
     const attackTime = 0.2 * ((this.attack + 1) / 128) + 0.01;
 
@@ -111,17 +117,17 @@ export class Synth {
     };
   }
 
-  generateWaveform(note: number, velocity: number): OscillatorNode {
+  private generateWaveform(note: number, velocity: number): OscillatorNode {
     const osc = this.audioContext.createOscillator();
     osc.type = this.waveform;
     osc.frequency.setValueAtTime(
-      this.notesToFreq[note], this.audioContext.currentTime);
+        this.computeFrequency(note), this.audioContext.currentTime);
     osc.start();
 
     return osc;
   }
 
-  generateKarplus(note: number, velocity: number) {
+  private generateKarplus(note: number, velocity: number) {
     const frequency = this.notesToFreq[note];
     let impulse = 0.001 * this.audioContext.sampleRate;
     
@@ -141,7 +147,7 @@ export class Synth {
     return node;
   }
 
-  noteOff(noteOffEvent: EventPayload<NoteOffPayload>) {
+  private noteOff(noteOffEvent: EventPayload<NoteOffPayload>) {
     const {note} = noteOffEvent.detail;
     const decayTime = 2 * ((this.decay + 1) / 128) + 0.01;
     this.nodes[note].gainNode.gain.exponentialRampToValueAtTime(
@@ -149,6 +155,17 @@ export class Synth {
     this.nodes[note].gainNode.gain.setValueAtTime(
         0, this.audioContext.currentTime + decayTime);
     this.cleanupNodes(note);
+  }
+
+  private handlePitchBend(pitchBendEvent: EventPayload<PitchBendPayload>) {
+    const {value} = pitchBendEvent.detail;
+    this.pitchBend = value;
+    for (const key of Object.keys(this.nodes)) {
+      const note = Number(key);
+      const osc = this.nodes[note].oscillatorNode;
+      osc.frequency.setValueAtTime(
+          this.computeFrequency(note), this.audioContext.currentTime);
+    }
   }
 
   private cleanupNodes(note: number) {
