@@ -31,27 +31,18 @@ export class Store {
     this.eventBus.emit(STORE_CHANGE, this.state);
   }
 
-  /**
-   * @param {KnobTurnEvent} note
-   */
   knobTurn(knobTurnEvent: EventPayload<KnobTurnPayload>) {
     const {knob, value} = knobTurnEvent.detail;
     this.state.knobs[knob] = value;
     this.emitChange();
   }
 
-  /**
-   * @param {NoteOnEvent} note
-   */
   noteOn(noteOnEvent: EventPayload<NoteOnPayload>) {
     const {note, velocity} = noteOnEvent.detail;
     this.state.notes.push(note);
     this.emitChange();
   }
 
-  /**
-   * @param {NoteOffEvent} note
-   */
   noteOff(noteOffEvent: EventPayload<NoteOffPayload>) {
     const {note} = noteOffEvent.detail;
     this.state.notes = this.state.notes.filter((n) => n !== note);
