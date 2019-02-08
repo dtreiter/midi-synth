@@ -25,7 +25,7 @@ export class MidiHandler {
   }
 
   setupHandler(midiAccess: WebMidi.MIDIAccess) {
-    for (let input of midiAccess.inputs.values()) {
+    for (const input of midiAccess.inputs.values()) {
       input.onmidimessage = this.handleMessage.bind(this);
     }
   }
