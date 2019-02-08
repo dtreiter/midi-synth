@@ -1,14 +1,22 @@
 {
   "compilerOptions": {
     "allowJs": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
     "downlevelIteration": true,
+    "forceConsistentCasingInFileNames": true,
     "lib": ["es2017", "dom", "dom.iterable"],
     "module": "es6",
+    "noEmitOnError": true,
+    "noFallthroughCasesInSwitch": true,
     "noImplicitAny": true,
+    "noImplicitReturns": true,
     "outDir": "./build",
     "preserveConstEnums": true,
+    "pretty": true,
     "removeComments": true,
     "sourceMap": true,
+    "strict": true,
     "strictNullChecks": true,
     "target": "es2016"
   },
@@ -16,7 +24,6 @@
     "src/**/*"
   ],
   "exclude": [
-    "node_modules",
-    "**/*.spec.ts"
+    "node_modules"
   ]
 }

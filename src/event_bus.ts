@@ -10,7 +10,8 @@ export class EventBus {
    this.bus.dispatchEvent(event);
   }
 
-  listen(name: string, listener: () => void) {
+  // TODO Don't use `any`
+  listen(name: string, listener: (arg0: any) => void) {
    this.bus.addEventListener(name, listener);
   }
 

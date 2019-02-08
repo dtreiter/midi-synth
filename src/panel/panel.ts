@@ -1,5 +1,6 @@
-import {EventBus} from '../event_bus.js';
+import {EventBus, EventPayload} from '../event_bus.js';
 import {STORE_CHANGE, STORE_INITIALIZED} from '../store/events.js';
+import {StoreState} from '../store/store.js';
 import {WAVEFORMS} from '../synth.js';
 
 export class Panel {
@@ -15,8 +16,7 @@ export class Panel {
     this.eventBus.listen(STORE_INITIALIZED, this.render.bind(this));
   }
 
-  // TODO (storeChangeEvent: StoreState)
-  render(storeChangeEvent: any): void {
+  render(storeChangeEvent: EventPayload<StoreState>): void {
     const {knobs, notes} = storeChangeEvent.detail;
 
     const template = `
