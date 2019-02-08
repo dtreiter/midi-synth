@@ -23,6 +23,7 @@ copy-html:
 	find ./src -name '*.html' -type f -exec cp {} ./build/ \;
 
 format:
+	$(CLANG_FORMAT) -i ./src/*.ts
 	$(CLANG_FORMAT) -i ./src/**/*.ts
 
 install:

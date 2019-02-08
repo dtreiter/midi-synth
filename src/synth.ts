@@ -1,5 +1,5 @@
 import {EventBus, EventPayload} from './event_bus.js'
-import {KNOB_TURN, NOTE_ON, NOTE_OFF, PITCH_BEND, KnobTurnPayload, NoteOffPayload, NoteOnPayload, PitchBendPayload} from './midi/events.js';
+import {KNOB_TURN, KnobTurnPayload, NOTE_OFF, NOTE_ON, NoteOffPayload, NoteOnPayload, PITCH_BEND, PitchBendPayload} from './midi/events.js';
 
 export const WAVEFORMS: OscillatorType[] = [
   'sine',
@@ -25,8 +25,8 @@ export class Synth {
   private pitchBend: number = 0;  // Range from (-64, 63).
 
   constructor(
-    private readonly audioContext: AudioContext, 
-    private readonly eventBus: EventBus,
+      private readonly audioContext: AudioContext,
+      private readonly eventBus: EventBus,
   ) {
     this.notesToFreq = this.computeNoteTable();
 
@@ -53,7 +53,7 @@ export class Synth {
 
   private computeNoteTable(): number[] {
     // The frequency of notes is given by:
-    //   f_n = f_0 * a^n 
+    //   f_n = f_0 * a^n
     //
     // where:
     //   f_0: the frequency of one fixed note which must be
@@ -68,7 +68,7 @@ export class Synth {
 
     const A440 = 69;  // The midi note for A440
     const f_0 = 440;
-    const a = Math.pow(2, 1/12);
+    const a = Math.pow(2, 1 / 12);
 
     const noteMap = [];
     for (let i = 0; i < 127; i++) {
@@ -82,7 +82,7 @@ export class Synth {
   private computeFrequency(note: number): number {
     // See the formula mentioned in `computeNoteTable`.
     const f_0 = this.notesToFreq[note];
-    const a = Math.pow(2, 1/12);
+    const a = Math.pow(2, 1 / 12);
     // Convert value range to (-2, 2) to represent semitones.
     const n = this.pitchBend / 32;
 
@@ -100,7 +100,7 @@ export class Synth {
     //
     // Converting this from dB to a linear gain factor leads to:
     //   gain = velocity^2 / 127^2
-    const gainValue = velocity**2 / 127**2;
+    const gainValue = velocity ** 2 / 127 ** 2;
 
     const gainNode = this.audioContext.createGain();
     gainNode.connect(this.audioContext.destination);
@@ -130,20 +130,21 @@ export class Synth {
   private generateKarplus(note: number, velocity: number) {
     const frequency = this.notesToFreq[note];
     let impulse = 0.001 * this.audioContext.sampleRate;
-    
+
     const node = this.audioContext.createScriptProcessor(4096, 0, 1);
     const N = Math.round(this.audioContext.sampleRate / frequency);
     const y = new Float32Array(N);
     let n = 0;
-    node.onaudioprocess = function (e) {
+    node.onaudioprocess =
+        function(e) {
       var output = e.outputBuffer.getChannelData(0);
       for (var i = 0; i < e.outputBuffer.length; ++i) {
-        var xn = (--impulse >= 0) ? Math.random()-0.5 : 0;
+        var xn = (--impulse >= 0) ? Math.random() - 0.5 : 0;
         output[i] = y[n] = xn + (y[n] + y[(n + 1) % N]) / 2;
         if (++n >= N) n = 0;
       }
     }
-    
+
     return node;
   }
 

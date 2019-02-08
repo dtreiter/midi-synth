@@ -11,5 +11,6 @@ const synth = new Synth(new AudioContext(), eventBus);
 const appContainer = document.querySelector('#app') as HTMLElement;
 const panel = new Panel(appContainer, eventBus);
 
-// Note, this must come last or the initialize event won't be received by the panel.
+// Note, this must come last or the initialize event won't be received by the
+// panel.
 const store = new Store(eventBus);
