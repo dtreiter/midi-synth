@@ -1,4 +1,4 @@
-export interface EventPayload<T> {
+export interface EventPayload<T> extends CustomEvent<T> {
   detail: T;
 }
 
@@ -10,9 +10,8 @@ export class EventBus {
     this.bus.dispatchEvent(event);
   }
 
-  // TODO Don't use `any`
-  listen(name: string, listener: (arg0: any) => void) {
-    this.bus.addEventListener(name, listener);
+  listen(name: string, listener: (eventPayload: EventPayload<any>) => void) {
+    this.bus.addEventListener(name, listener as EventListener);
   }
 
   unlisten(name: string, listener: () => void) {
