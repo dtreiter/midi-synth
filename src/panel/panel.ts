@@ -4,8 +4,8 @@ import {WAVEFORMS} from '../synth.js';
 
 export class Panel {
   constructor(
-    private readonly container: HTMLElement,
-    private readonly eventBus: EventBus,
+      private readonly container: HTMLElement,
+      private readonly eventBus: EventBus,
   ) {
     this.bindEvents();
   }

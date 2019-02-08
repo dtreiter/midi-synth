@@ -1,6 +1,7 @@
 import {EventBus, EventPayload} from '../event_bus.js';
+import {KNOB_TURN, KnobTurnPayload, NOTE_OFF, NOTE_ON, NoteOffPayload, NoteOnPayload} from '../midi/events.js';
+
 import {STORE_CHANGE, STORE_INITIALIZED} from './events.js';
-import {KNOB_TURN, NOTE_ON, NOTE_OFF, KnobTurnPayload, NoteOffPayload, NoteOnPayload} from '../midi/events.js';
 
 export interface StoreState {
   notes: number[];
@@ -14,7 +15,7 @@ export class Store {
   };
 
   constructor(
-    private readonly eventBus: EventBus,
+      private readonly eventBus: EventBus,
   ) {
     this.bindEvents();
     this.eventBus.emit(STORE_INITIALIZED, this.state);
@@ -33,7 +34,7 @@ export class Store {
   /**
    * @param {KnobTurnEvent} note
    */
-   knobTurn(knobTurnEvent: EventPayload<KnobTurnPayload>) {
+  knobTurn(knobTurnEvent: EventPayload<KnobTurnPayload>) {
     const {knob, value} = knobTurnEvent.detail;
     this.state.knobs[knob] = value;
     this.emitChange();
@@ -42,7 +43,7 @@ export class Store {
   /**
    * @param {NoteOnEvent} note
    */
-   noteOn(noteOnEvent: EventPayload<NoteOnPayload>) {
+  noteOn(noteOnEvent: EventPayload<NoteOnPayload>) {
     const {note, velocity} = noteOnEvent.detail;
     this.state.notes.push(note);
     this.emitChange();

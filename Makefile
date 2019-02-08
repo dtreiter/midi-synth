@@ -1,8 +1,8 @@
 .PHONY: build clean copy-html install run watch
 	default: build
 
-INSTALL_DIR=./node_modules/typescript/bin/
-TSC=$(INSTALL_DIR)tsc
+TSC=./node_modules/typescript/bin/tsc
+CLANG_FORMAT=./node_modules/clang-format/bin/darwin_x64/clang-format
 
 build: copy-html
 	$(TSC)
@@ -13,6 +13,9 @@ clean:
 copy-html:
 	mkdir build
 	find ./src -name '*.html' -type f -exec cp {} ./build/ \;
+
+format:
+	$(CLANG_FORMAT) -i ./src/**/*.ts
 
 install:
 	npm install

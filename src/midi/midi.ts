@@ -1,5 +1,6 @@
-import {KNOB_TURN, NOTE_ON, NOTE_OFF, PITCH_BEND} from './events.js';
 import {EventBus} from '../event_bus.js';
+
+import {KNOB_TURN, NOTE_OFF, NOTE_ON, PITCH_BEND} from './events.js';
 
 const CHANNEL_TO_KNOB_MAP: {[key: number]: number} = {
   71: 0,
@@ -14,13 +15,13 @@ const CHANNEL_TO_KNOB_MAP: {[key: number]: number} = {
 
 export class MidiHandler {
   constructor(
-    private readonly eventBus: EventBus,
+      private readonly eventBus: EventBus,
   ) {
     navigator.requestMIDIAccess()
-      .then(this.setupHandler.bind(this))
-      .catch((err) => {
-        throw new Error(err);
-      });
+        .then(this.setupHandler.bind(this))
+        .catch((err) => {
+          throw new Error(err);
+        });
   }
 
   setupHandler(midiAccess: WebMidi.MIDIAccess) {
