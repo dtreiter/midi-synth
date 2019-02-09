@@ -109,7 +109,6 @@ export class Synth {
         gainValue, this.audioContext.currentTime + attackTime);
 
     const oscillatorNode = this.generateWaveform(note, velocity);
-    // const oscillatorNode = this.generateKarplus(note, velocity);
     oscillatorNode.connect(gainNode);
     this.nodes[note] = {
       gainNode,
@@ -127,23 +126,43 @@ export class Synth {
     return osc;
   }
 
-  private generateKarplus(note: number, velocity: number) {
-    const frequency = this.notesToFreq[note];
-    let impulse = 0.001 * this.audioContext.sampleRate;
+  private generateKarplus(note: number, velocity: number): ScriptProcessorNode {
+    const frequency = this.computeFrequency(note);
 
-    const node = this.audioContext.createScriptProcessor(4096, 0, 1);
-    const N = Math.round(this.audioContext.sampleRate / frequency);
-    const y = new Float32Array(N);
+    // The required phase delay D for a given fundamental frequency f_0 is
+    // calculated according to D = f_s/f_0 where f_s is the sampling frequency.
+    const D = Math.round(this.audioContext.sampleRate / frequency);
+
+    // Buffer of size D which we will inject an impulse into, low-pass filter,
+    // and repeat in the output buffer every D samples.
+    const y = new Float32Array(D);
+
+    let impulseSamples = 0.001 * this.audioContext.sampleRate;
     let n = 0;
+
+    const node = this.audioContext.createScriptProcessor(512, 0, 1);
     node.onaudioprocess =
-        function(e) {
-      var output = e.outputBuffer.getChannelData(0);
-      for (var i = 0; i < e.outputBuffer.length; ++i) {
-        var xn = (--impulse >= 0) ? Math.random() - 0.5 : 0;
-        output[i] = y[n] = xn + (y[n] + y[(n + 1) % N]) / 2;
-        if (++n >= N) n = 0;
-      }
-    }
+        (e) => {
+          const output = e.outputBuffer.getChannelData(0);
+          for (let i = 0; i < e.outputBuffer.length; i++) {
+            // We low-pass filter the signal by averaging consecutive samples.
+            y[n] = (y[n] + y[(n + 1) % D]) / 2;
+
+            if (impulseSamples >= 0) {
+              // Use random noise for the impulse for `impulseSamples` number of
+              // samples.
+              impulseSamples -= 1;
+              y[n] += Math.random() - 0.5;
+            }
+
+            output[i] = y[n];
+
+            n += 1;
+            if (n >= D) {
+              n = 0;
+            }
+          }
+        }
 
     return node;
   }

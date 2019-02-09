@@ -4,6 +4,7 @@
   - Can't use store for note on/off easily though
 - Add css arch knobs
 - Vibrato mod wheel
+- Multiple oscillators per note
 
 # TODONT?
 - Use Action interface {type, payload}
