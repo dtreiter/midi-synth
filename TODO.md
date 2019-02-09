@@ -5,6 +5,7 @@
 - Add css arch knobs
 - Vibrato mod wheel
 - Multiple oscillators per note
+- Clean up ScriptProcessorNodes memory usage for Karplus-Strong implementation
 
 # TODONT?
 - Use Action interface {type, payload}
