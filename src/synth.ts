@@ -89,7 +89,8 @@ export class Synth {
   }
 
   private generateKarplus(note: number, velocity: number): ScriptProcessorNode {
-    const frequency = this.noteService.getFrequencyForNote(note, this.pitchBend);
+    const frequency =
+        this.noteService.getFrequencyForNote(note, this.pitchBend);
 
     // The required phase delay D for a given fundamental frequency f_0 is
     // calculated according to D = f_s/f_0 where f_s is the sampling frequency.
