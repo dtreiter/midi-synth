@@ -99,7 +99,7 @@ export class Synth {
     // and repeat in the output buffer every D samples.
     const y = new Float32Array(D);
 
-    let impulseSamples = 0.001 * this.audioContext.sampleRate;
+    let impulseSamples = D / 3;
     let n = 0;
 
     const node = this.audioContext.createScriptProcessor(512, 0, 1);
