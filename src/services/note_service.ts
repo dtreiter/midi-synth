@@ -37,7 +37,7 @@ export class NoteService {
    * Computes the frequency for the provided note number and pitch bend value
    * (range in -64, 63).
    */
-  getFrequencyForNote(note: number, pitchBend: number): number {
+  frequencyForNote(note: number, pitchBend: number): number {
     // See the formula mentioned in `computeNoteTable`.
     const f0 = this.notesToFreq[note];
     const a = Math.pow(2, 1 / 12);
@@ -45,5 +45,19 @@ export class NoteService {
     const n = pitchBend / 32;
 
     return f0 * Math.pow(a, n);
+  }
+
+  /**
+   * Computes a linear gain factor given a MIDI velocity in range 0, 127.
+   */
+  gainForVelocity(velocity: number): number {
+    // From the DLS LEVEL 1 spec:
+    //   The MIDI Note Velocity value is converted to attenuation in dB by the
+    //   Concave Transform according to the following formula:
+    //     atten_dB = 20 × log_10(127^2 / velocity^2)
+    //
+    // Converting this from dB to a linear gain factor leads to:
+    //   gain = velocity^2 / 127^2
+    return velocity ** 2 / 127 ** 2;
   }
 }

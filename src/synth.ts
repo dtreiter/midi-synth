@@ -52,17 +52,9 @@ export class Synth {
 
   private noteOn(noteOnEvent: EventPayload<NoteOnPayload>) {
     const {note, velocity} = noteOnEvent.detail;
+
     const attackTime = 0.2 * ((this.attack + 1) / 128) + 0.01;
-
-    // From the DLS LEVEL 1 spec:
-    //   The MIDI Note Velocity value is converted to attenuation in dB by the
-    //   Concave Transform according to the following formula:
-    //     atten_dB = 20 × log_10(127^2 / velocity^2)
-    //
-    // Converting this from dB to a linear gain factor leads to:
-    //   gain = velocity^2 / 127^2
-    const gainValue = velocity ** 2 / 127 ** 2;
-
+    const gainValue = this.noteService.gainForVelocity(velocity);
     const gainNode = this.audioContext.createGain();
     gainNode.connect(this.audioContext.destination);
     gainNode.gain.setValueAtTime(0.01, this.audioContext.currentTime);
@@ -75,59 +67,6 @@ export class Synth {
       gainNode,
       oscillatorNode,
     };
-  }
-
-  private generateWaveform(note: number, velocity: number): OscillatorNode {
-    const osc = this.audioContext.createOscillator();
-    osc.type = this.waveform;
-    osc.frequency.setValueAtTime(
-        this.noteService.getFrequencyForNote(note, this.pitchBend),
-        this.audioContext.currentTime);
-    osc.start();
-
-    return osc;
-  }
-
-  private generateKarplus(note: number, velocity: number): ScriptProcessorNode {
-    const frequency =
-        this.noteService.getFrequencyForNote(note, this.pitchBend);
-
-    // The required phase delay D for a given fundamental frequency f_0 is
-    // calculated according to D = f_s/f_0 where f_s is the sampling frequency.
-    const D = Math.round(this.audioContext.sampleRate / frequency);
-
-    // Buffer of size D which we will inject an impulse into, low-pass filter,
-    // and repeat in the output buffer every D samples.
-    const y = new Float32Array(D);
-
-    let impulseSamples = D / 3;
-    let n = 0;
-
-    const node = this.audioContext.createScriptProcessor(512, 0, 1);
-    node.onaudioprocess =
-        (e) => {
-          const output = e.outputBuffer.getChannelData(0);
-          for (let i = 0; i < e.outputBuffer.length; i++) {
-            // We low-pass filter the signal by averaging consecutive samples.
-            y[n] = (y[n] + y[(n + 1) % D]) / 2;
-
-            if (impulseSamples >= 0) {
-              // Use random noise for the impulse for `impulseSamples` number of
-              // samples.
-              impulseSamples -= 1;
-              y[n] += Math.random() - 0.5;
-            }
-
-            output[i] = y[n];
-
-            n += 1;
-            if (n >= D) {
-              n = 0;
-            }
-          }
-        }
-
-    return node;
   }
 
   private noteOff(noteOffEvent: EventPayload<NoteOffPayload>) {
@@ -147,9 +86,20 @@ export class Synth {
       const note = Number(key);
       const osc = this.nodes[note].oscillatorNode;
       osc.frequency.setValueAtTime(
-          this.noteService.getFrequencyForNote(note, this.pitchBend),
+          this.noteService.frequencyForNote(note, this.pitchBend),
           this.audioContext.currentTime);
     }
+  }
+
+  private generateWaveform(note: number, velocity: number): OscillatorNode {
+    const osc = this.audioContext.createOscillator();
+    osc.type = this.waveform;
+    osc.frequency.setValueAtTime(
+        this.noteService.frequencyForNote(note, this.pitchBend),
+        this.audioContext.currentTime);
+    osc.start();
+
+    return osc;
   }
 
   private cleanupNodes(note: number) {
