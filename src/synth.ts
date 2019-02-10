@@ -1,5 +1,6 @@
 import {EventBus, EventPayload} from './event_bus.js'
 import {KNOB_TURN, KnobTurnPayload, NOTE_OFF, NOTE_ON, NoteOffPayload, NoteOnPayload, PITCH_BEND, PitchBendPayload} from './midi/events.js';
+import {NoteService} from './services/note_service.js';
 
 export const WAVEFORMS: OscillatorType[] = [
   'sine',
@@ -21,15 +22,13 @@ export class Synth {
   waveform = WAVEFORMS[0];
 
   private nodes: Nodes = {};
-  private notesToFreq: number[];
   private pitchBend: number = 0;  // Range from (-64, 63).
 
   constructor(
       private readonly audioContext: AudioContext,
       private readonly eventBus: EventBus,
+      private readonly noteService: NoteService,
   ) {
-    this.notesToFreq = this.computeNoteTable();
-
     this.bindEvents();
   }
 
@@ -49,44 +48,6 @@ export class Synth {
     } else if (knob === 2) {
       this.decay = value;
     }
-  }
-
-  private computeNoteTable(): number[] {
-    // The frequency of notes is given by:
-    //   f_n = f_0 * a^n
-    //
-    // where:
-    //   f_0: the frequency of one fixed note which must be
-    //        defined. For example, A440.
-    //
-    //   n:   the number of half steps away from the fixed note. If a higher
-    //        note, n is positive. If lower note, n is negative.
-    //
-    //   f_n: the frequency of the note n half steps away.
-    //
-    //   a:   the twelth root of 2 ~= 1.0594...
-
-    const A440 = 69;  // The midi note for A440
-    const f_0 = 440;
-    const a = Math.pow(2, 1 / 12);
-
-    const noteMap = [];
-    for (let i = 0; i < 127; i++) {
-      const n = i - A440;
-      noteMap[i] = f_0 * Math.pow(a, n);
-    }
-
-    return noteMap;
-  }
-
-  private computeFrequency(note: number): number {
-    // See the formula mentioned in `computeNoteTable`.
-    const f_0 = this.notesToFreq[note];
-    const a = Math.pow(2, 1 / 12);
-    // Convert value range to (-2, 2) to represent semitones.
-    const n = this.pitchBend / 32;
-
-    return f_0 * Math.pow(a, n);
   }
 
   private noteOn(noteOnEvent: EventPayload<NoteOnPayload>) {
@@ -120,14 +81,15 @@ export class Synth {
     const osc = this.audioContext.createOscillator();
     osc.type = this.waveform;
     osc.frequency.setValueAtTime(
-        this.computeFrequency(note), this.audioContext.currentTime);
+        this.noteService.getFrequencyForNote(note, this.pitchBend),
+        this.audioContext.currentTime);
     osc.start();
 
     return osc;
   }
 
   private generateKarplus(note: number, velocity: number): ScriptProcessorNode {
-    const frequency = this.computeFrequency(note);
+    const frequency = this.noteService.getFrequencyForNote(note, this.pitchBend);
 
     // The required phase delay D for a given fundamental frequency f_0 is
     // calculated according to D = f_s/f_0 where f_s is the sampling frequency.
@@ -184,7 +146,8 @@ export class Synth {
       const note = Number(key);
       const osc = this.nodes[note].oscillatorNode;
       osc.frequency.setValueAtTime(
-          this.computeFrequency(note), this.audioContext.currentTime);
+          this.noteService.getFrequencyForNote(note, this.pitchBend),
+          this.audioContext.currentTime);
     }
   }
 

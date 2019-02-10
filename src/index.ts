@@ -3,10 +3,12 @@ import {MidiHandler} from './midi/midi.js';
 import {Panel} from './panel/panel.js';
 import {Store} from './store/store.js';
 import {Synth} from './synth.js';
+import {NoteService} from './services/note_service.js';
 
 const eventBus = new EventBus();
+const noteService = new NoteService();
 const midiHandler = new MidiHandler(eventBus);
-const synth = new Synth(new AudioContext(), eventBus);
+const synth = new Synth(new AudioContext(), eventBus, noteService);
 
 const appContainer = document.querySelector('#app') as HTMLElement;
 const panel = new Panel(appContainer, eventBus);
