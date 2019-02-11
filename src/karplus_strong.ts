@@ -8,11 +8,13 @@ interface Nodes {
 
 /**
  * Simple Karplus-Strong implementation using a white-noise impulse and moving
- * average low-pass filter.
+ * average low-pass filter. The size of the impulse and number of samples in the
+ * filter are controllable.
  * NOTE: Currently does not support pitch bend or velocity.
  */
 export class KarplusStrong {
   impulseLength = 0.3;
+  filterLength = 5;
 
   private nodes: Nodes = {};
 
@@ -34,6 +36,8 @@ export class KarplusStrong {
     const {knob, value} = knobTurnEvent.detail;
     if (knob === 0) {
       this.impulseLength = value / 127;
+    } else if (knob === 1) {
+      this.filterLength = value + 2;
     }
   }
 
@@ -69,7 +73,11 @@ export class KarplusStrong {
           const output = e.outputBuffer.getChannelData(0);
           for (let i = 0; i < e.outputBuffer.length; i++) {
             // We low-pass filter the signal by averaging consecutive samples.
-            y[n] = (y[n] + y[(n + 1) % D]) / 2;
+            let sum = 0
+            for (let j = 0; j < this.filterLength; j++) {
+              sum += y[(n + j) % D];
+            }
+            y[n] = sum / this.filterLength;
 
             if (impulseSamples >= 0) {
               // Use random noise for the impulse for `impulseSamples` number of
