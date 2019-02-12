@@ -28,10 +28,10 @@ export class Panel {
         <b>Waveform:</b> ${WAVEFORMS[knobs[0] % WAVEFORMS.length]}
       </p>
       <p>
-        ${knob({label: 'Attack', value: knobs[1]})}
+        ${knob({label: 'Attack', value: knobs[1] / 127})}
       </p>
       <p>
-        ${knob({label: 'Decay', value: knobs[2]})}
+        ${knob({label: 'Decay', value: knobs[2] / 127})}
       </p>
     `;
 
