@@ -3,14 +3,14 @@ import {EventBus} from '../event_bus.js';
 import {KNOB_TURN, NOTE_OFF, NOTE_ON, PITCH_BEND} from './events.js';
 
 const CHANNEL_TO_KNOB_MAP: {[key: number]: number} = {
-  71: 0,
-  74: 1,
-  84: 2,
-  7: 3,
-  91: 4,
-  93: 5,
-  5: 6,
-  10: 7,
+  5: 0,
+  73: 1,
+  15: 2,
+  14: 3,
+  74: 4,
+  71: 5,
+  70: 6,
+  91: 7,
 };
 
 export class MidiHandler {
