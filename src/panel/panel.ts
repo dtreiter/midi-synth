@@ -2,6 +2,7 @@ import {EventBus, EventPayload} from '../event_bus.js';
 import {STORE_CHANGE, STORE_INITIALIZED} from '../store/events.js';
 import {StoreState} from '../store/store.js';
 import {WAVEFORMS} from '../synth.js';
+import {knob} from '../templates/knob.js';
 
 export class Panel {
   constructor(
@@ -27,10 +28,10 @@ export class Panel {
         <b>Waveform:</b> ${WAVEFORMS[knobs[0] % WAVEFORMS.length]}
       </p>
       <p>
-        <b>Attack:</b> ${knobs[1]}
+        ${knob({label: 'Attack', value: knobs[1]})}
       </p>
       <p>
-        <b>Decay:</b> ${knobs[2]}
+        ${knob({label: 'Decay', value: knobs[2]})}
       </p>
     `;
 
