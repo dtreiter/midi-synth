@@ -1,8 +1,11 @@
 import {EventBus} from '../event_bus.js';
-import {ControlPanelFactory} from './control_panel.js';
+
+import {AppContainerFactory} from './app_container.js';
 import {RadialKnob} from './radial_knob.js';
+import {SynthPanel} from './synth_panel.js';
 
 export function defineCustomElements(eventBus: EventBus) {
-  customElements.define('control-panel', ControlPanelFactory(eventBus));
+  customElements.define('app-container', AppContainerFactory(eventBus));
+  customElements.define('synth-panel', SynthPanel);
   customElements.define('radial-knob', RadialKnob);
 }

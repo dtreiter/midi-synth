@@ -4,21 +4,21 @@ export class RadialKnob extends HTMLElement {
     this.render();
   }
 
-  get label(): string {
+  private get label(): string {
     if (!this.hasAttribute('label')) {
       throw new Error('radial-knob requires attribute: `label`');
     }
     return String(this.getAttribute('label'));
   }
 
-  get value(): number {
+  private get value(): number {
     if (!this.hasAttribute('value')) {
       throw new Error('radial-knob requires attribute: `value`');
     }
     return Number(this.getAttribute('value'));
   }
 
-  render() {
+  private render() {
     const size = 24;
     const strokeWidth = 5;
     const radius = size - strokeWidth;

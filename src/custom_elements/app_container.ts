@@ -3,8 +3,8 @@ import {STORE_CHANGE, STORE_INITIALIZED} from '../store/events.js';
 import {StoreState} from '../store/store.js';
 import {WAVEFORMS} from '../synth.js';
 
-export function ControlPanelFactory(eventBus: EventBus) {
-  return class ControlPanel extends HTMLElement {
+export function AppContainerFactory(eventBus: EventBus) {
+  return class AppContainer extends HTMLElement {
     private eventBus: EventBus;
 
     constructor() {
@@ -19,23 +19,15 @@ export function ControlPanelFactory(eventBus: EventBus) {
       this.eventBus.listen(STORE_INITIALIZED, this.render.bind(this));
     }
 
-    render(storeChangeEvent: EventPayload<StoreState>): void {
+    private render(storeChangeEvent: EventPayload<StoreState>) {
       const {knobs, notes} = storeChangeEvent.detail;
 
       this.innerHTML = `
-	<p>
-	  <b>Note:</b> ${notes}
-	</p>
-	<p>
-	  <b>Waveform:</b> ${WAVEFORMS[knobs[0] % WAVEFORMS.length]}
-	</p>
-	<p>
-	  <radial-knob label="Attack" value="${knobs[1] / 127}"></radial-knob>
-	</p>
-	<p>
-	  <radial-knob label="Decay" value="${knobs[2] / 127}"></radial-knob>
-	</p>
-      `;
+        <synth-panel attack="${knobs[1] / 127}"
+                     decay="${knobs[2] / 127}"
+                     waveform="${WAVEFORMS[knobs[0] % WAVEFORMS.length]}">
+        </synth-panel>
+      `
     }
   }
 }
