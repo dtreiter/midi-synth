@@ -1,4 +1,4 @@
-- Components implement interface containing 'render'
+- Rename 'SWITCH_INSTRUMENT' to 'SELECT_INSTRUMENT' ?
 - Refactor synth.ts to use store for attack / decay?
   - Allows initial values to be set properly
   - Can't use store for note on/off easily though

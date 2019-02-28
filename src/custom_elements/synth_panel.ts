@@ -27,6 +27,7 @@ export class SynthPanel extends HTMLElement {
 
   private render(): void {
     this.innerHTML = `
+      <h2>Waveform Synthesis</h2>
       <p>
         <b>Waveform:</b> ${this.waveform}
       </p>

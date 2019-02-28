@@ -1,7 +1,8 @@
 import {EventBus, EventPayload} from '../event_bus.js';
+import {InstrumentType} from '../instruments/instrument_type.js';
+import {WAVEFORMS} from '../instruments/synth.js';
 import {STORE_CHANGE, STORE_INITIALIZED} from '../store/events.js';
 import {StoreState} from '../store/store.js';
-import {WAVEFORMS} from '../synth.js';
 
 export function AppContainerFactory(eventBus: EventBus) {
   return class AppContainer extends HTMLElement {
@@ -20,13 +21,22 @@ export function AppContainerFactory(eventBus: EventBus) {
     }
 
     private render(storeChangeEvent: EventPayload<StoreState>) {
-      const {knobs, notes} = storeChangeEvent.detail;
+      const {instrument, knobs, notes} = storeChangeEvent.detail;
 
+      const isKarplus = instrument === InstrumentType.KARPLUS;
       this.innerHTML = `
-        <synth-panel attack="${knobs[1] / 127}"
-                     decay="${knobs[2] / 127}"
-                     waveform="${WAVEFORMS[knobs[0] % WAVEFORMS.length]}">
-        </synth-panel>
+        <h1>MIDI-Synth</h1>
+        <instrument-selector instrument="${instrument}"></instrument-selector>
+        ${
+          isKarplus ? `
+              <karplus-panel impulseLength="${knobs[0] / 127}"
+                             filterLength="${knobs[1] / 127}">
+              </karplus-panel>` :
+                      `
+              <synth-panel attack="${knobs[1] / 127}"
+                           decay="${knobs[2] / 127}"
+                           waveform="${WAVEFORMS[knobs[0] % WAVEFORMS.length]}">
+              </synth-panel>`}
       `
     }
   }

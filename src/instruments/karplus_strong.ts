@@ -1,6 +1,6 @@
-import {EventBus, EventPayload} from './event_bus.js'
-import {KNOB_TURN, KnobTurnPayload, NOTE_OFF, NOTE_ON, NoteOffPayload, NoteOnPayload} from './midi/events.js';
-import {NoteService} from './services/note_service.js';
+import {EventBus, EventPayload} from '../event_bus.js'
+import {KNOB_TURN, KnobTurnPayload, NOTE_OFF, NOTE_ON, NoteOffPayload, NoteOnPayload} from '../midi/events.js';
+import {NoteService} from '../services/note_service.js';
 
 interface Nodes {
   [key: number]: ScriptProcessorNode;
