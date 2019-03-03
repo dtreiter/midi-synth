@@ -7,11 +7,12 @@ import {InstrumentService} from './services/instrument_service.js';
 import {NoteService} from './services/note_service.js';
 import {Store} from './store/store.js';
 
+const audioContext = new AudioContext();
 const eventBus = new EventBus();
 const noteService = new NoteService();
 const midiHandler = new MidiHandler(eventBus);
-const synth = new Synth(new AudioContext(), eventBus, noteService);
-const karplus = new KarplusStrong(new AudioContext(), eventBus, noteService);
+const karplus = new KarplusStrong(audioContext, eventBus, noteService);
+const synth = new Synth(audioContext, eventBus, noteService);
 const instrumentService = new InstrumentService(eventBus, karplus, synth);
 
 defineCustomElements(eventBus);
