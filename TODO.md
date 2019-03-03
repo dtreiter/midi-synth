@@ -2,6 +2,9 @@
 - Refactor synth.ts to use store for attack / decay?
   - Allows initial values to be set properly
   - Can't use store for note on/off easily though
+- MIDI Effects
+  - Octave
+  - Arpeggio
 - Vibrato mod wheel
 - Multiple oscillators per note
 - Clean up ScriptProcessorNodes memory usage for Karplus-Strong implementation
