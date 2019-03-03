@@ -1,6 +1,7 @@
 import {EventBus, EventPayload} from '../event_bus.js'
 import {KNOB_TURN, KnobTurnPayload, NOTE_OFF, NOTE_ON, NoteOffPayload, NoteOnPayload, PITCH_BEND, PitchBendPayload} from '../midi/events.js';
 import {NoteService} from '../services/note_service.js';
+import {Instrument} from './instrument.js';
 
 export const WAVEFORMS: OscillatorType[] = [
   'sine',
@@ -16,7 +17,7 @@ interface Nodes {
   };
 }
 
-export class Synth {
+export class Synth implements Instrument {
   attack = 10;  // Range from (0, 127).
   decay = 127;  // Range from (0, 127).
   waveform = WAVEFORMS[0];
@@ -32,11 +33,25 @@ export class Synth {
     this.bindEvents();
   }
 
+  enable() {
+    this.eventBus.listen(KNOB_TURN, this.handleKnobTurn);
+    this.eventBus.listen(NOTE_ON, this.noteOn);
+    this.eventBus.listen(NOTE_OFF, this.noteOff);
+    this.eventBus.listen(PITCH_BEND, this.handlePitchBend);
+  }
+
+  disable() {
+    this.eventBus.unlisten(KNOB_TURN, this.handleKnobTurn);
+    this.eventBus.unlisten(NOTE_ON, this.noteOn);
+    this.eventBus.unlisten(NOTE_OFF, this.noteOff);
+    this.eventBus.unlisten(PITCH_BEND, this.handlePitchBend);
+  }
+
   private bindEvents() {
-    this.eventBus.listen(KNOB_TURN, this.handleKnobTurn.bind(this));
-    this.eventBus.listen(NOTE_ON, this.noteOn.bind(this));
-    this.eventBus.listen(NOTE_OFF, this.noteOff.bind(this));
-    this.eventBus.listen(PITCH_BEND, this.handlePitchBend.bind(this));
+    this.handleKnobTurn = this.handleKnobTurn.bind(this);
+    this.noteOn = this.noteOn.bind(this);
+    this.noteOff = this.noteOff.bind(this);
+    this.handlePitchBend = this.handlePitchBend.bind(this);
   }
 
   private handleKnobTurn(knobTurnEvent: EventPayload<KnobTurnPayload>) {

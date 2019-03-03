@@ -1,6 +1,7 @@
 import {EventBus, EventPayload} from '../event_bus.js'
 import {KNOB_TURN, KnobTurnPayload, NOTE_OFF, NOTE_ON, NoteOffPayload, NoteOnPayload} from '../midi/events.js';
 import {NoteService} from '../services/note_service.js';
+import {Instrument} from './instrument.js';
 
 interface Nodes {
   [key: number]: ScriptProcessorNode;
@@ -12,7 +13,7 @@ interface Nodes {
  * filter are controllable.
  * NOTE: Currently does not support pitch bend or velocity.
  */
-export class KarplusStrong {
+export class KarplusStrong implements Instrument {
   impulseLength = 0.3;
   filterLength = 5;
 
@@ -26,10 +27,22 @@ export class KarplusStrong {
     this.bindEvents();
   }
 
+  enable() {
+    this.eventBus.listen(KNOB_TURN, this.handleKnobTurn);
+    this.eventBus.listen(NOTE_ON, this.noteOn);
+    this.eventBus.listen(NOTE_OFF, this.noteOff);
+  }
+
+  disable() {
+    this.eventBus.unlisten(KNOB_TURN, this.handleKnobTurn);
+    this.eventBus.unlisten(NOTE_ON, this.noteOn);
+    this.eventBus.unlisten(NOTE_OFF, this.noteOff);
+  }
+
   private bindEvents() {
-    this.eventBus.listen(KNOB_TURN, this.handleKnobTurn.bind(this));
-    this.eventBus.listen(NOTE_ON, this.noteOn.bind(this));
-    this.eventBus.listen(NOTE_OFF, this.noteOff.bind(this));
+    this.handleKnobTurn = this.handleKnobTurn.bind(this);
+    this.noteOn = this.noteOn.bind(this);
+    this.noteOff = this.noteOff.bind(this);
   }
 
   private handleKnobTurn(knobTurnEvent: EventPayload<KnobTurnPayload>) {

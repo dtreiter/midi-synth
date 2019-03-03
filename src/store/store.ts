@@ -1,6 +1,6 @@
 import {SWITCH_INSTRUMENT, SwitchInstrumentPayload} from '../custom_elements/instrument_selector/events.js'
 import {EventBus, EventPayload} from '../event_bus.js';
-import {InstrumentType} from '../instruments/instrument_type.js';
+import {InstrumentType} from '../instruments/instrument.js';
 import {KNOB_TURN, KnobTurnPayload, NOTE_OFF, NOTE_ON, NoteOffPayload, NoteOnPayload} from '../midi/events.js';
 
 import {STORE_CHANGE, STORE_INITIALIZED} from './events.js';

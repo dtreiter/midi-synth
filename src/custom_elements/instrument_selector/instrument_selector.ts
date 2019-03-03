@@ -1,5 +1,5 @@
 import {EventBus} from '../../event_bus.js';
-import {InstrumentType} from '../../instruments/instrument_type.js';
+import {InstrumentType} from '../../instruments/instrument.js';
 
 import {SWITCH_INSTRUMENT} from './events.js';
 

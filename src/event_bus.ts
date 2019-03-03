@@ -14,7 +14,7 @@ export class EventBus {
     this.bus.addEventListener(name, listener as EventListener);
   }
 
-  unlisten(name: string, listener: () => void) {
-    this.bus.removeEventListener(name, listener);
+  unlisten(name: string, listener: (eventPayload: EventPayload<any>) => void) {
+    this.bus.removeEventListener(name, listener as EventListener);
   }
 }

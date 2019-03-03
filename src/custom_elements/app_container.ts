@@ -1,5 +1,5 @@
 import {EventBus, EventPayload} from '../event_bus.js';
-import {InstrumentType} from '../instruments/instrument_type.js';
+import {InstrumentType} from '../instruments/instrument.js';
 import {WAVEFORMS} from '../instruments/synth.js';
 import {STORE_CHANGE, STORE_INITIALIZED} from '../store/events.js';
 import {StoreState} from '../store/store.js';
